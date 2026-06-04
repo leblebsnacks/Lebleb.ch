@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LebLeb – Snack dich smart</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700;1,9..144,900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════ */
+:root {
+  --black:   #0c0c0c;
+  --off:     #131313;
+  --panel:   #181818;
+  --border:  #272727;
+  --mid:     #555;
+  --muted:   #888;
+  --light:   #bbb;
+  --white:   #f4f2ee;
+  --gold:    #c8a050;
+  --gold-lt: #e8c070;
+  --choc:    #5c2e0a;
+  --green:   #4a7c59;
+  --green-lt:#6aaa7a;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden;cursor:none;}
+a{color:inherit;text-decoration:none;}
+
+/* cursor */
+.cursor{position:fixed;top:0;left:0;z-index:9999;pointer-events:none;width:10px;height:10px;border-radius:50%;background:var(--gold);transform:translate(-50%,-50%);transition:width .3s,height .3s;mix-blend-mode:difference;}
+.cursor-ring{position:fixed;top:0;left:0;z-index:9998;pointer-events:none;width:36px;height:36px;border-radius:50%;border:1px solid rgba(200,160,80,.45);transform:translate(-50%,-50%);transition:width .3s,height .3s;}
+
+/* ══ NAV ══ */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.6rem 3rem;transition:background .4s,backdrop-filter .4s;}
+nav.scrolled{background:rgba(12,12,12,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+.nav-logo{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:900;letter-spacing:-.03em;}
+.nav-logo em{font-style:italic;color:var(--gold);}
+.nav-links{display:flex;gap:2.5rem;list-style:none;}
+.nav-links a{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);transition:color .25s;}
+.nav-links a:hover{color:var(--white);}
+.nav-cta{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;padding:.6rem 1.4rem;border:1px solid var(--gold);color:var(--gold);border-radius:100px;transition:background .25s,color .25s;}
+.nav-cta:hover{background:var(--gold);color:var(--black);}
+
+/* ══ HERO ══ */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:0 3rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.025;pointer-events:none;z-index:1;}
+.hero::after{content:'';position:absolute;right:-5%;top:50%;transform:translateY(-50%);width:55vw;height:55vw;border-radius:50%;background:radial-gradient(circle,rgba(200,160,80,.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.hero-left{position:relative;z-index:2;padding-top:6rem;}
+.hero-eyebrow{font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.8rem;display:flex;align-items:center;gap:.8rem;opacity:0;transform:translateY(20px);animation:fadeUp .8s .3s ease forwards;}
+.hero-eyebrow::before{content:'';width:28px;height:1px;background:var(--gold);}
+.hero-headline{font-family:'Fraunces',serif;font-size:clamp(3.5rem,6.5vw,6.5rem);font-weight:900;line-height:.95;letter-spacing:-.03em;margin-bottom:2rem;opacity:0;transform:translateY(24px);animation:fadeUp .9s .45s ease forwards;}
+.hero-headline em{font-style:italic;color:var(--gold);display:block;}
+.hero-sub{font-size:.98rem;color:var(--muted);line-height:1.75;max-width:380px;margin-bottom:3rem;font-weight:300;opacity:0;transform:translateY(20px);animation:fadeUp .8s .6s ease forwards;}
+.hero-actions{display:flex;gap:1.2rem;align-items:center;opacity:0;transform:translateY(20px);animation:fadeUp .8s .75s ease forwards;}
+.btn-primary{padding:.9rem 2.2rem;background:var(--gold);color:var(--black);font-weight:500;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;border-radius:100px;transition:transform .25s,box-shadow .25s;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(200,160,80,.3);}
+.btn-ghost{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:.5rem;transition:color .25s,gap .25s;}
+.btn-ghost:hover{color:var(--white);gap:.8rem;}
+.btn-ghost::after{content:'→';}
+.hero-tags{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:3rem;opacity:0;animation:fadeUp .8s .9s ease forwards;}
+.tag{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;padding:.4rem .9rem;border:1px solid var(--border);border-radius:100px;color:var(--muted);}
+.hero-right{position:relative;z-index:2;display:flex;justify-content:center;align-items:center;padding-top:6rem;}
+.hero-bag{animation:float 5s ease-in-out infinite,fadeIn 1s .5s ease forwards;opacity:0;filter:drop-shadow(0 40px 80px rgba(0,0,0,.7)) drop-shadow(0 8px 20px rgba(200,160,80,.12));}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-18px) rotate(1deg);}}
+@keyframes fadeIn{to{opacity:1;}}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+.scroll-hint{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--mid);animation:fadeIn 1.2s 1.4s ease forwards;opacity:0;}
+.scroll-hint-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--mid),transparent);animation:scrollPulse 1.8s ease-in-out infinite;}
+@keyframes scrollPulse{0%,100%{opacity:.3;}50%{opacity:1;}}
+
+/* ══ MARQUEE ══ */
+.marquee-band{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1rem 0;overflow:hidden;background:var(--off);}
+.marquee-track{display:flex;animation:marquee 22s linear infinite;white-space:nowrap;}
+.marquee-item{font-family:'Fraunces',serif;font-style:italic;font-size:.9rem;color:var(--muted);padding:0 2.5rem;flex-shrink:0;}
+.marquee-item span{color:var(--gold);font-style:normal;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;margin-right:2.5rem;}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ══ SECTIONS COMMONS ══ */
+section{padding:8rem 3rem;}
+.section-eyebrow{font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;display:flex;align-items:center;gap:.8rem;}
+.section-eyebrow::before{content:'';width:24px;height:1px;background:var(--gold);}
+.section-title{font-family:'Fraunces',serif;font-size:clamp(2.2rem,4vw,3.8rem);font-weight:900;line-height:1.05;letter-spacing:-.025em;margin-bottom:1.5rem;}
+.section-title em{font-style:italic;color:var(--gold);}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .8s ease,transform .8s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-delay-1{transition-delay:.1s;}
+.reveal-delay-2{transition-delay:.2s;}
+.reveal-delay-3{transition-delay:.3s;}
+.reveal-delay-4{transition-delay:.4s;}
+.reveal-delay-5{transition-delay:.5s;}
+
+/* ══ PRODUKTE ══ */
+#produkte{background:var(--off);border-top:1px solid var(--border);}
+.products-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:4rem;}
+.product-card{background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:3rem 2.5rem;display:flex;flex-direction:column;gap:1.5rem;position:relative;overflow:hidden;transition:border-color .3s,transform .4s cubic-bezier(.34,1.4,.64,1);}
+.product-card:hover{border-color:var(--gold);transform:translateY(-6px);}
+.product-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s;border-radius:20px;}
+.product-card:hover::before{opacity:1;}
+.card-classic::before{background:radial-gradient(ellipse at top right,rgba(92,46,10,.15) 0%,transparent 60%);}
+.card-vegan::before{background:radial-gradient(ellipse at top right,rgba(74,124,89,.12) 0%,transparent 60%);}
+.product-badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;padding:.35rem .9rem;border-radius:100px;width:fit-content;font-weight:500;}
+.badge-classic{background:rgba(92,46,10,.3);color:#d4906a;border:1px solid rgba(92,46,10,.5);}
+.badge-vegan{background:rgba(74,124,89,.25);color:var(--green-lt);border:1px solid rgba(74,124,89,.4);}
+.product-name{font-family:'Fraunces',serif;font-size:2.2rem;font-weight:900;letter-spacing:-.02em;line-height:1.1;}
+.product-desc{font-size:.88rem;color:var(--muted);line-height:1.7;}
+.product-attributes{display:flex;gap:.6rem;flex-wrap:wrap;}
+.attr{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .75rem;border:1px solid var(--border);border-radius:100px;color:var(--mid);}
+.product-cta{display:inline-flex;align-items:center;gap:.5rem;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-top:auto;transition:gap .25s;}
+.product-cta:hover{gap:.8rem;}
+.product-cta::after{content:'→';}
+
+/* ══ ORIGINS ══ */
+#origins{border-top:1px solid var(--border);position:relative;overflow:hidden;}
+.origins-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start;margin-top:4rem;}
+.country-list{display:flex;flex-direction:column;gap:0;}
+.country-item{display:grid;grid-template-columns:2.5rem 1fr;gap:1rem;padding:1.6rem 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;border-radius:8px;}
+.country-item:first-child{padding-top:0;}
+.country-item:last-child{border-bottom:none;}
+.country-flag{font-size:1.6rem;line-height:1;}
+.country-name{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;margin-bottom:.25rem;}
+.country-detail{font-size:.82rem;color:var(--muted);line-height:1.6;}
+.country-highlight{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-top:.4rem;display:inline-block;}
+
+/* World map placeholder with dots */
+.origins-map{position:sticky;top:6rem;}
+.map-container{background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:2rem;aspect-ratio:16/10;position:relative;overflow:hidden;}
+.map-bg{width:100%;height:100%;position:relative;}
+/* SVG world outline */
+.map-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--gold);transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(200,160,80,.25), 0 0 12px rgba(200,160,80,.4);}
+.map-dot::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(200,160,80,.3);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8;}50%{transform:scale(1.5);opacity:0;}}
+.map-dot:nth-child(2)::before{animation-delay:.4s;}
+.map-dot:nth-child(3)::before{animation-delay:.8s;}
+.map-dot:nth-child(4)::before{animation-delay:1.2s;}
+.map-dot:nth-child(5)::before{animation-delay:1.6s;}
+.map-label{position:absolute;font-size:.55rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transform:translateX(-50%);margin-top:8px;white-space:nowrap;}
+.map-title{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);margin-bottom:1rem;}
+
+/* ══ PROCESS / DOPPELRÖSTEN ══ */
+#prozess{background:var(--off);border-top:1px solid var(--border);}
+.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:4rem;}
+.step-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:2rem 1.5rem;position:relative;overflow:hidden;transition:border-color .3s,transform .35s cubic-bezier(.34,1.4,.64,1);}
+.step-card:hover{border-color:rgba(200,160,80,.4);transform:translateY(-4px);}
+.step-num{font-family:'Fraunces',serif;font-size:4rem;font-weight:900;color:var(--border);letter-spacing:-.04em;line-height:1;position:absolute;top:.8rem;right:1rem;}
+.step-icon{font-size:1.8rem;margin-bottom:1.2rem;}
+.step-title{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;margin-bottom:.6rem;}
+.step-body{font-size:.82rem;color:var(--muted);line-height:1.65;}
+.step-highlight{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-top:.8rem;display:block;}
+
+/* Double roast explainer */
+.double-roast{margin-top:4rem;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:3rem;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
+.roast-visual{display:flex;align-items:center;justify-content:center;gap:2rem;}
+.roast-stage{text-align:center;}
+.roast-circle{width:80px;height:80px;border-radius:50%;margin:0 auto 0.8rem;display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
+.roast-1{background:radial-gradient(circle,#d4a030,#a06010);box-shadow:0 0 20px rgba(160,96,16,.3);}
+.roast-2{background:radial-gradient(circle,#c8883a,#7a4008);box-shadow:0 0 30px rgba(120,64,8,.5);}
+.roast-arrow{font-size:1.5rem;color:var(--gold);opacity:.6;}
+.roast-label{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);}
+.roast-temp{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;color:var(--gold);}
+.roast-text p{font-size:.9rem;color:var(--muted);line-height:1.75;margin-bottom:1rem;}
+.roast-text p strong{color:var(--white);font-weight:500;}
+
+/* ══ WHY ══ */
+#warum{border-top:1px solid var(--border);}
+.values-layout{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start;margin-top:4rem;}
+.values-list{display:flex;flex-direction:column;gap:0;}
+.value-item{display:grid;grid-template-columns:3rem 1fr;gap:1.2rem;padding:1.8rem 0;border-bottom:1px solid var(--border);}
+.value-item:last-child{border-bottom:none;padding-bottom:0;}
+.value-num{font-family:'Fraunces',serif;font-size:.75rem;font-style:italic;color:var(--gold);padding-top:.2rem;}
+.value-title{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:700;margin-bottom:.4rem;}
+.value-body{font-size:.85rem;color:var(--muted);line-height:1.7;}
+.stat-block{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:2.2rem;margin-bottom:1.2rem;}
+.stat-block:last-child{margin-bottom:0;}
+.stat-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);margin-bottom:.8rem;}
+.stat-num{font-family:'Fraunces',serif;font-size:3.5rem;font-weight:900;color:var(--gold);letter-spacing:-.03em;line-height:1;}
+.stat-unit{font-size:1rem;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--muted);margin-left:.3rem;}
+.stat-desc{font-size:.8rem;color:var(--muted);line-height:1.5;margin-top:.8rem;}
+
+/* ══ STORY ══ */
+#story{background:var(--off);border-top:1px solid var(--border);}
+.story-layout{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;margin-top:4rem;}
+.story-text p{font-size:.95rem;color:var(--muted);line-height:1.85;margin-bottom:1.5rem;}
+.story-text p strong{color:var(--white);font-weight:500;}
+.story-pull{font-family:'Fraunces',serif;font-size:clamp(1.6rem,2.5vw,2.4rem);font-style:italic;font-weight:700;line-height:1.25;color:var(--white);border-left:3px solid var(--gold);padding-left:2rem;margin:3rem 0;}
+.founder-card{background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:2.5rem;}
+.founder-head{font-family:'Fraunces',serif;font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--gold);font-style:italic;}
+.founder-text{font-size:.88rem;color:var(--muted);line-height:1.7;}
+.founder-names{margin-top:1.8rem;padding-top:1.5rem;border-top:1px solid var(--border);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);}
+.progress-list{margin-top:1.5rem;padding:2rem;border:1px solid var(--border);border-radius:16px;display:flex;flex-direction:column;gap:.85rem;}
+.progress-item{display:flex;gap:1rem;align-items:center;}
+.prog-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.prog-text{font-size:.82rem;color:var(--muted);}
+
+/* ══ NEWSLETTER ══ */
+#newsletter{border-top:1px solid var(--border);text-align:center;position:relative;overflow:hidden;}
+#newsletter::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:600px;height:300px;border-radius:50%;background:radial-gradient(ellipse,rgba(200,160,80,.06) 0%,transparent 70%);pointer-events:none;}
+.newsletter-title{font-family:'Fraunces',serif;font-size:clamp(2rem,4vw,3.5rem);font-weight:900;letter-spacing:-.025em;margin-bottom:1rem;}
+.newsletter-title em{font-style:italic;color:var(--gold);}
+.newsletter-sub{font-size:.9rem;color:var(--muted);margin-bottom:3rem;}
+.email-form{display:flex;justify-content:center;max-width:440px;margin:0 auto;}
+.email-input{flex:1;padding:.9rem 1.4rem;background:var(--panel);border:1px solid var(--border);border-right:none;border-radius:100px 0 0 100px;color:var(--white);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;transition:border-color .25s;}
+.email-input:focus{border-color:var(--gold);}
+.email-input::placeholder{color:var(--mid);}
+.email-submit{padding:.9rem 1.6rem;background:var(--gold);color:var(--black);font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;border:none;border-radius:0 100px 100px 0;cursor:pointer;transition:background .25s;}
+.email-submit:hover{background:var(--gold-lt);}
+
+/* ══ FOOTER ══ */
+footer{border-top:1px solid var(--border);padding:3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1.5rem;}
+.footer-logo{font-family:'Fraunces',serif;font-size:1.3rem;font-weight:900;letter-spacing:-.02em;}
+.footer-logo em{font-style:italic;color:var(--gold);}
+.footer-links{display:flex;gap:2rem;list-style:none;}
+.footer-links a{font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);transition:color .2s;}
+.footer-links a:hover{color:var(--white);}
+.footer-copy{font-size:.7rem;color:var(--mid);}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  nav{padding:1.2rem 1.5rem;}
+  .nav-links{display:none;}
+  section{padding:5rem 1.5rem;}
+  .hero{grid-template-columns:1fr;padding:0 1.5rem;padding-top:8rem;padding-bottom:4rem;min-height:auto;}
+  .hero-right{display:none;}
+  .products-grid,.origins-layout,.values-layout,.story-layout,.process-steps,.double-roast{grid-template-columns:1fr;gap:2rem;}
+  .process-steps{grid-template-columns:1fr 1fr;}
+  footer{flex-direction:column;text-align:center;padding:2rem 1.5rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">Leb<em>Leb</em></div>
+  <ul class="nav-links">
+    <li><a href="#produkte">Produkte</a></li>
+    <li><a href="#origins">Herkunft</a></li>
+    <li><a href="#prozess">Herstellung</a></li>
+    <li><a href="#story">Story</a></li>
+  </ul>
+  <a href="#newsletter" class="nav-cta">Früh-Zugang</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-left">
+    <div class="hero-eyebrow">Jahrhundertealte Tradition. Neu entdeckt.</div>
+    <h1 class="hero-headline">Snack<em>dich smart.</em></h1>
+    <p class="hero-sub">Leblebi — doppelgeröstete Kichererbsen aus dem Mittelmeerraum, dragiert mit echter Schweizer Schokolade. Knusprig, proteinreich, einzigartig.</p>
+    <div class="hero-actions">
+      <a href="#produkte" class="btn-primary">Produkte entdecken</a>
+      <a href="#origins" class="btn-ghost">Woher kommt Leblebi</a>
+    </div>
+    <div class="hero-tags">
+      <span class="tag">Doppelgeröstet</span>
+      <span class="tag">Dragiert</span>
+      <span class="tag">Schweizer Schokolade</span>
+      <span class="tag">High Protein</span>
+      <span class="tag">Vegan</span>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <!-- Floating bag SVG -->
+    <svg class="hero-bag" width="320" height="430" viewBox="0 0 300 410" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="hbag" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#0a0a0a"/><stop offset="22%" stop-color="#1e1e1e"/>
+          <stop offset="44%" stop-color="#2b2b2b"/><stop offset="58%" stop-color="#242424"/>
+          <stop offset="80%" stop-color="#161616"/><stop offset="100%" stop-color="#080808"/>
+        </linearGradient>
+        <linearGradient id="hsh" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="white" stop-opacity=".13"/><stop offset="10%" stop-color="white" stop-opacity=".05"/>
+          <stop offset="50%" stop-color="white" stop-opacity="0"/><stop offset="90%" stop-color="white" stop-opacity=".04"/>
+          <stop offset="100%" stop-color="white" stop-opacity=".11"/>
+        </linearGradient>
+        <radialGradient id="hc1" cx="33%" cy="28%" r="65%">
+          <stop offset="0%" stop-color="#f2cc72"/><stop offset="40%" stop-color="#d4a030"/>
+          <stop offset="74%" stop-color="#b07818"/><stop offset="100%" stop-color="#7a5010"/>
+        </radialGradient>
+        <radialGradient id="hc2" cx="40%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#efbe60"/><stop offset="44%" stop-color="#c89028"/>
+          <stop offset="78%" stop-color="#a06c10"/><stop offset="100%" stop-color="#6e4808"/>
+        </radialGradient>
+        <radialGradient id="hch" cx="28%" cy="22%" r="65%">
+          <stop offset="0%" stop-color="#5a2208" stop-opacity=".85"/><stop offset="55%" stop-color="#2c1005"/>
+          <stop offset="100%" stop-color="#160802"/>
+        </radialGradient>
+        <filter id="hls"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity=".18"/></filter>
+        <filter id="hcs"><feDropShadow dx="1" dy="3" stdDeviation="3" flood-color="#1a0800" flood-opacity=".45"/></filter>
+        <filter id="hcg"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#2c1005" flood-opacity=".55"/></filter>
+        <clipPath id="hcl1"><ellipse cx="0" cy="0" rx="24" ry="18"/></clipPath>
+        <clipPath id="hcl2"><ellipse cx="0" cy="0" rx="25" ry="18"/></clipPath>
+        <clipPath id="hcl3"><ellipse cx="0" cy="0" rx="23" ry="17"/></clipPath>
+        <clipPath id="hcl4"><ellipse cx="0" cy="0" rx="24" ry="18"/></clipPath>
+        <clipPath id="hcl5"><ellipse cx="0" cy="0" rx="24" ry="17"/></clipPath>
+      </defs>
+      <path d="M55,26 Q150,9 245,26 L260,52 L267,345 Q150,380 33,345 L40,52Z" fill="url(#hbag)"/>
+      <path d="M55,26 Q150,9 245,26 L260,52 L267,345 Q150,380 33,345 L40,52Z" fill="url(#hsh)"/>
+      <path d="M47,48 L38,340" stroke="white" stroke-width="1.5" stroke-opacity=".07" fill="none" stroke-linecap="round"/>
+      <path d="M253,48 L263,340" stroke="white" stroke-width="1.5" stroke-opacity=".06" fill="none" stroke-linecap="round"/>
+      <path d="M40,332 Q150,366 260,332 L267,360 Q150,396 33,360Z" fill="#0d0d0d"/>
+      <path d="M53,36 Q150,21 247,36 L253,49 Q150,34 47,49Z" fill="#191919"/>
+      <path d="M55,38 Q150,24 245,38" stroke="#444" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M55,42 Q150,28 245,42" stroke="#505050" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <g fill="#323232"><ellipse cx="76" cy="40" rx="3" ry="2"/><ellipse cx="100" cy="38" rx="3" ry="2"/><ellipse cx="124" cy="36" rx="3" ry="2"/><ellipse cx="150" cy="35" rx="3" ry="2"/><ellipse cx="176" cy="36" rx="3" ry="2"/><ellipse cx="200" cy="38" rx="3" ry="2"/><ellipse cx="224" cy="40" rx="3" ry="2"/></g>
+      <path d="M90,10 L83,21 L97,21Z" fill="#1c1c1c"/><path d="M210,10 L203,21 L217,21Z" fill="#1c1c1c"/>
+      <ellipse cx="150" cy="15" rx="10" ry="7" fill="#080808"/>
+      <ellipse cx="150" cy="15" rx="7" ry="5" fill="#111" stroke="#333" stroke-width="1"/>
+      <circle cx="150" cy="195" r="104" fill="#5c2e0a" filter="url(#hls)"/>
+      <circle cx="150" cy="195" r="98" fill="#fafaf8"/>
+      <circle cx="150" cy="195" r="97" fill="none" stroke="#ede9e3" stroke-width=".8"/>
+      <text x="150" y="119" text-anchor="middle" font-family="Georgia,serif" font-size="40" font-weight="900" fill="#111" letter-spacing="-0.8">LebLeb</text>
+      <g filter="url(#hcs)">
+        <g transform="translate(110,153) rotate(-18)"><ellipse cx="0" cy="0" rx="24" ry="18" fill="url(#hc1)"/><path d="M-14,-4 Q-2,-14 14,-2" stroke="#8a5c10" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".6"/><ellipse cx="-6" cy="-6" rx="9" ry="6" fill="white" opacity=".18" transform="rotate(-10,-6,-6)"/><ellipse cx="16" cy="2" rx="5" ry="4" fill="#c88c18"/><g clip-path="url(#hcl1)" filter="url(#hcg)"><path d="M-22,-18 Q-10,-13 -4,-10 Q2,-13 10,-11 Q16,-9 22,-13 L22,-18Z" fill="url(#hch)"/><path d="M-12,-10 Q-13,-3 -12,3" stroke="#1e0b03" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M4,-10 Q3,-2 5,6" stroke="#1e0b03" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M16,-10 Q17,-3 15,4" stroke="#1e0b03" stroke-width="3" fill="none" stroke-linecap="round"/></g></g>
+        <g transform="translate(190,147) rotate(12)"><ellipse cx="0" cy="0" rx="25" ry="18" fill="url(#hc2)"/><path d="M-14,-3 Q-1,-13 15,-2" stroke="#886010" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".6"/><ellipse cx="-5" cy="-7" rx="10" ry="6" fill="white" opacity=".17" transform="rotate(8,-5,-7)"/><ellipse cx="-17" cy="2" rx="5" ry="4" fill="#c08818"/><g clip-path="url(#hcl2)" filter="url(#hcg)"><path d="M-24,-18 Q-11,-13 -2,-11 Q8,-13 18,-11 Q22,-13 26,-16 L26,-18Z" fill="url(#hch)"/><path d="M-14,-10 Q-15,-2 -13,5" stroke="#1e0b03" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M2,-10 Q1,-1 3,7" stroke="#1e0b03" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M18,-10 Q19,-3 17,5" stroke="#1e0b03" stroke-width="3.5" fill="none" stroke-linecap="round"/></g></g>
+        <g transform="translate(150,144) rotate(3)"><ellipse cx="0" cy="0" rx="23" ry="17" fill="url(#hc1)"/><path d="M-13,-3 Q0,-13 13,-2" stroke="#8a6012" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".6"/><ellipse cx="-4" cy="-6" rx="8" ry="5" fill="white" opacity=".17"/><ellipse cx="14" cy="1" rx="4" ry="3.5" fill="#c48c14"/><g clip-path="url(#hcl3)" filter="url(#hcg)"><path d="M-22,-17 Q-10,-12 0,-10 Q10,-12 20,-10 Q23,-13 24,-17Z" fill="url(#hch)"/><path d="M-10,-10 Q-11,-2 -9,6" stroke="#1e0b03" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M6,-10 Q5,-1 7,7" stroke="#1e0b03" stroke-width="4" fill="none" stroke-linecap="round"/></g></g>
+        <g transform="translate(123,187) rotate(-8)"><ellipse cx="0" cy="0" rx="24" ry="18" fill="url(#hc2)"/><path d="M-14,-2 Q-1,-12 14,-1" stroke="#886010" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".6"/><ellipse cx="-6" cy="-7" rx="9" ry="5" fill="white" opacity=".19" transform="rotate(-5,-6,-7)"/><ellipse cx="15" cy="2" rx="5" ry="4" fill="#bf8810"/><g clip-path="url(#hcl4)" filter="url(#hcg)"><path d="M-22,-18 Q-10,-13 0,-11 Q10,-13 20,-11 Q23,-14 25,-18Z" fill="url(#hch)"/><path d="M-12,-10 Q-13,-2 -11,6" stroke="#1e0b03" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M4,-10 Q3,-1 5,7" stroke="#1e0b03" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M16,-10 Q17,-3 15,5" stroke="#1e0b03" stroke-width="3" fill="none" stroke-linecap="round"/></g></g>
+        <g transform="translate(180,183) rotate(15)"><ellipse cx="0" cy="0" rx="24" ry="17" fill="url(#hc1)"/><path d="M-13,-3 Q0,-13 13,-2" stroke="#8a5e10" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".6"/><ellipse cx="-5" cy="-6" rx="9" ry="5" fill="white" opacity=".18"/><ellipse cx="-16" cy="1" rx="5" ry="4" fill="#c28c14"/><g clip-path="url(#hcl5)" filter="url(#hcg)"><path d="M-22,-17 Q-10,-12 0,-10 Q12,-12 22,-10 Q24,-13 25,-17Z" fill="url(#hch)"/><path d="M-10,-10 Q-11,-2 -9,6" stroke="#1e0b03" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M6,-10 Q5,-1 7,7" stroke="#1e0b03" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M18,-10 Q19,-3 17,5" stroke="#1e0b03" stroke-width="3" fill="none" stroke-linecap="round"/></g></g>
+      </g>
+      <text x="150" y="233" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="600" fill="#1a1a1a" letter-spacing=".4">snack dich smart</text>
+      <text x="150" y="252" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#666" letter-spacing=".3">doppelgeröstet · dragiert</text>
+      <text x="150" y="267" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#666" letter-spacing=".3">Schweizer Milchschokolade</text>
+      <rect x="116" y="278" width="68" height="15" rx="7.5" fill="#5c2e0a"/>
+      <text x="150" y="289" text-anchor="middle" font-family="sans-serif" font-size="8" font-weight="600" fill="white" letter-spacing="1">CLASSIC</text>
+      <text x="150" y="375" text-anchor="middle" font-family="sans-serif" font-size="8.5" fill="#3a3a3a" letter-spacing="1.4">CLASSIC CHOC · 100g</text>
+    </svg>
+  </div>
+  <div class="scroll-hint"><div class="scroll-hint-line"></div>Scroll</div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-band">
+  <div class="marquee-track">
+    <span class="marquee-item">Doppelgeröstet <span>·</span></span>
+    <span class="marquee-item">Dragiert <span>·</span></span>
+    <span class="marquee-item">Schweizer Schokolade <span>·</span></span>
+    <span class="marquee-item">Çorum · Türkei <span>·</span></span>
+    <span class="marquee-item">High Protein <span>·</span></span>
+    <span class="marquee-item">100% Vegan <span>·</span></span>
+    <span class="marquee-item">Mediterrane Tradition <span>·</span></span>
+    <span class="marquee-item">Swiss Made <span>·</span></span>
+    <span class="marquee-item">Doppelgeröstet <span>·</span></span>
+    <span class="marquee-item">Dragiert <span>·</span></span>
+    <span class="marquee-item">Schweizer Schokolade <span>·</span></span>
+    <span class="marquee-item">Çorum · Türkei <span>·</span></span>
+    <span class="marquee-item">High Protein <span>·</span></span>
+    <span class="marquee-item">100% Vegan <span>·</span></span>
+    <span class="marquee-item">Mediterrane Tradition <span>·</span></span>
+    <span class="marquee-item">Swiss Made <span>·</span></span>
+  </div>
+</div>
+
+<!-- PRODUKTE -->
+<section id="produkte">
+  <div class="reveal"><div class="section-eyebrow">Unsere Produkte</div></div>
+  <h2 class="section-title reveal reveal-delay-1">Zwei Sorten. <em>Eine Philosophie.</em></h2>
+  <p style="color:var(--muted);max-width:520px;line-height:1.75;font-size:.9rem;" class="reveal reveal-delay-2">Dieselbe handverlesene Kichererbse, doppelgeröstet, und dann in echte Schweizer Kuvertüre dragiert — in mehreren Schichten, bis die Hülle sitzt.</p>
+  <div class="products-grid">
+    <div class="product-card card-classic reveal reveal-delay-2">
+      <span class="product-badge badge-classic">● Classic Choc</span>
+      <div class="product-name">Classic<br>Choc</div>
+      <p class="product-desc">Die Originalvariante. Doppelgeröstete Leblebi-Kichererbse, dragiert mit cremiger Schweizer Milchschokolade (Felchlin / Barry Callebaut). Knackige Hülle, weiches Inneres, perfekter Biss.</p>
+      <div class="product-attributes">
+        <span class="attr">Milchschokolade</span><span class="attr">Dragiert</span>
+        <span class="attr">Doppelgeröstet</span><span class="attr">18g Protein</span><span class="attr">Glutenfrei</span>
+      </div>
+      <a href="#newsletter" class="product-cta">Vorbestellen</a>
+    </div>
+    <div class="product-card card-vegan reveal reveal-delay-3">
+      <span class="product-badge badge-vegan">● Vegan Choc</span>
+      <div class="product-name">Vegan<br>Choc</div>
+      <p class="product-desc">Kraftvoll und kompromisslos. Dieselbe doppelgeröstete Kichererbse, umhüllt von intensiver veganer Zartbitterschokolade. Kein Schellack, kein Kompromiss — mit Carnaubawachs für den Glanz.</p>
+      <div class="product-attributes">
+        <span class="attr">Vegane Zartbitter</span><span class="attr">Dragiert</span>
+        <span class="attr">100% Vegan</span><span class="attr">18g Protein</span><span class="attr">Glutenfrei</span>
+      </div>
+      <a href="#newsletter" class="product-cta">Vorbestellen</a>
+    </div>
+  </div>
+</section>
+
+<!-- ORIGINS -->
+<section id="origins">
+  <div class="reveal"><div class="section-eyebrow">Herkunft & Geschichte</div></div>
+  <h2 class="section-title reveal reveal-delay-1">Nicht nur Türkei —<br><em>eine ganze Kulturzone.</em></h2>
+  <p style="color:var(--muted);max-width:540px;line-height:1.75;font-size:.9rem;margin-bottom:0;" class="reveal reveal-delay-2">Leblebi ist seit Jahrhunderten in einer breiten Region zwischen Mittelmeer, Levante und Nordafrika zuhause. Wir bringen diese Tradition erstmals richtig in die Schweiz.</p>
+
+  <div class="origins-layout">
+    <div class="country-list">
+
+      <div class="country-item reveal reveal-delay-1">
+        <div class="country-flag">🇹🇷</div>
+        <div>
+          <div class="country-name">Türkei</div>
+          <p class="country-detail">Das Herz der Leblebi-Kultur. Die Stadt Çorum gilt als inoffizielle Welthauptstadt des Leblebi — dort gibt es ganze Strassen voller Röstereien, und jede Familie hat ihr eigenes Rezept. Der Begriff "Leblebi" kommt aus dem Türkischen und ist heute weltweit bekannt.</p>
+          <span class="country-highlight">Çorum = Leblebi-Hauptstadt der Welt</span>
+        </div>
+      </div>
+
+      <div class="country-item reveal reveal-delay-2">
+        <div class="country-flag">🇬🇷</div>
+        <div>
+          <div class="country-name">Griechenland</div>
+          <p class="country-detail">Auf den griechischen Inseln kennt man ihn als "Στραγάλια" (Strangalia) — ein klassischer Mezze-Begleiter zu Ouzo und Wein. Besonders auf Kreta und Rhodos ist er seit Generationen ein Alltagssnack.</p>
+          <span class="country-highlight">Klassischer Mezze-Snack seit Jahrhunderten</span>
+        </div>
+      </div>
+
+      <div class="country-item reveal reveal-delay-3">
+        <div class="country-flag">🇹🇳</div>
+        <div>
+          <div class="country-name">Tunesien & Nordafrika</div>
+          <p class="country-detail">In Tunesien ist "Leblebi" sogar ein vollständiges Gericht — Kichererbsen in einer würzigen Harissa-Brühe mit Brot. Als Snack ist die geröstete Variante ebenfalls tief in der Kultur verankert und an jeder Strassenecke zu finden.</p>
+          <span class="country-highlight">Basis eines ganzen Nationalgerichts</span>
+        </div>
+      </div>
+
+      <div class="country-item reveal reveal-delay-4">
+        <div class="country-flag">🇮🇷</div>
+        <div>
+          <div class="country-name">Iran & Naher Osten</div>
+          <p class="country-detail">Im Iran heisst er "Nakhod Beryan" — geröstete Kichererbsen sind fester Bestandteil der traditionellen Nussmischung "Ajil", die zu Festen und Familienfeiern gereicht wird. Die Röstkultur ist hier besonders ausgeprägt.</p>
+          <span class="country-highlight">Teil der traditionellen Ajil-Mischung</span>
+        </div>
+      </div>
+
+      <div class="country-item reveal reveal-delay-5">
+        <div class="country-flag">🇮🇳</div>
+        <div>
+          <div class="country-name">Indien</div>
+          <p class="country-detail">Als "Dalia" oder gerösteter "Chana" ist die doppelgeröstete Kichererbse in Indien ein Milliardenmarkt. Auf jedem Markt, in jedem Zug, an jeder Strassenecke — dieser Snack ist Teil des Alltags von über einer Milliarde Menschen.</p>
+          <span class="country-highlight">Milliarden-Snackmarkt in Asien</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="origins-map reveal reveal-delay-2">
+      <div class="map-container">
+        <div class="map-title">Leblebi-Kulturzone — von der Schweiz aus gesehen</div>
+        <!-- Simplified SVG world map outline -->
+        <svg width="100%" height="85%" viewBox="0 0 500 280" style="position:absolute;top:50px;left:0;opacity:.12;">
+          <!-- Europe -->
+          <path d="M200,60 Q220,50 240,55 Q260,48 270,60 Q280,55 290,65 Q285,75 275,78 Q265,85 255,80 Q245,88 235,82 Q225,85 215,78 Q205,72 200,60Z" fill="var(--muted)" stroke="var(--muted)" stroke-width=".5"/>
+          <!-- Turkey -->
+          <path d="M290,70 Q310,65 330,68 Q345,65 355,72 Q350,80 335,82 Q320,85 305,80 Q292,78 290,70Z" fill="var(--muted)"/>
+          <!-- North Africa -->
+          <path d="M215,95 Q240,90 270,92 Q295,90 315,95 Q320,110 310,125 Q285,130 260,128 Q235,130 215,120 Q210,108 215,95Z" fill="var(--muted)"/>
+          <!-- Middle East -->
+          <path d="M330,82 Q350,80 365,85 Q370,95 360,108 Q345,115 330,110 Q320,100 325,88Z" fill="var(--muted)"/>
+          <!-- India -->
+          <path d="M380,90 Q400,85 415,92 Q420,105 415,125 Q405,140 390,138 Q375,130 372,115 Q370,100 380,90Z" fill="var(--muted)"/>
+          <!-- Switzerland dot highlight -->
+          <circle cx="228" cy="68" r="3" fill="var(--white)" opacity=".6"/>
+        </svg>
+
+        <!-- Dots positioned on map (percentage-based) -->
+        <!-- Turkey -->
+        <div class="map-dot" style="left:66%;top:38%;"></div>
+        <div class="map-label" style="left:66%;top:calc(38% + 10px);">Türkei</div>
+        <!-- Greece -->
+        <div class="map-dot" style="left:57%;top:42%;animation-delay:.4s;"></div>
+        <div class="map-label" style="left:57%;top:calc(42% + 10px);">Griechenland</div>
+        <!-- Tunisia -->
+        <div class="map-dot" style="left:52%;top:58%;animation-delay:.8s;"></div>
+        <div class="map-label" style="left:52%;top:calc(58% + 10px);">Tunesien</div>
+        <!-- Iran -->
+        <div class="map-dot" style="left:76%;top:44%;animation-delay:1.2s;"></div>
+        <div class="map-label" style="left:76%;top:calc(44% + 10px);">Iran</div>
+        <!-- India -->
+        <div class="map-dot" style="left:86%;top:52%;animation-delay:1.6s;"></div>
+        <div class="map-label" style="left:86%;top:calc(52% + 10px);">Indien</div>
+        <!-- Switzerland -->
+        <div style="position:absolute;left:46%;top:30%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:var(--white);box-shadow:0 0 0 3px rgba(255,255,255,.2),0 0 16px rgba(255,255,255,.4);"></div>
+        <div class="map-label" style="left:46%;top:calc(30% + 8px);color:var(--white);">🇨🇭 LebLeb</div>
+      </div>
+
+      <!-- Pull quote -->
+      <div style="margin-top:1.5rem;padding:2rem;background:var(--panel);border:1px solid var(--border);border-radius:16px;">
+        <div class="section-eyebrow" style="font-size:.6rem;margin-bottom:.8rem;">Die besondere Sorte</div>
+        <p style="font-size:.88rem;color:var(--muted);line-height:1.7;">Nicht jede Kichererbse eignet sich für Leblebi. Für unser Produkt verwenden wir eine <strong style="color:var(--white);font-weight:500;">spezielle Kleinsorte mit dünner Schale und extrem dichtem, trockenem Kern</strong> — ganz anders als die grosse, weiche Hummus-Kichererbse. Diese Sorte nimmt das Doppelrösten gleichmässig auf und entwickelt den charakteristischen, nussigen Geschmack.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROZESS -->
+<section id="prozess">
+  <div class="reveal"><div class="section-eyebrow">Herstellung</div></div>
+  <h2 class="section-title reveal reveal-delay-1">Vom Feld zur<em>Schokoladenhülle.</em></h2>
+  <p style="color:var(--muted);max-width:520px;line-height:1.75;font-size:.9rem;" class="reveal reveal-delay-2">Unser Prozess hat vier klar definierte Schritte — jeder davon ist ein Qualitätsversprechen.</p>
+
+  <div class="process-steps">
+    <div class="step-card reveal reveal-delay-1">
+      <div class="step-num">01</div>
+      <div class="step-icon">🌿</div>
+      <div class="step-title">Import & Selektion</div>
+      <p class="step-body">Wir importieren ausschliesslich die spezielle Dünnschalen-Varietät direkt aus der Anbauregion rund um Çorum, Türkei. Jede Charge wird auf Grösse, Feuchtigkeitsgehalt und Reife geprüft, bevor sie in den Röster kommt.</p>
+      <span class="step-highlight">Direkt aus Çorum, Türkei</span>
+    </div>
+    <div class="step-card reveal reveal-delay-2">
+      <div class="step-num">02</div>
+      <div class="step-icon">🔥</div>
+      <div class="step-title">Erste Röstung</div>
+      <p class="step-body">Beim ersten Rösten bei moderater Hitze werden die Kichererbsen schonend aufgequollen und gleichmässig durchgetrocknet. Danach folgt eine Ruhezeit — damit sich die Struktur stabilisiert. Dieser Zwischenschritt ist das Geheimnis.</p>
+      <span class="step-highlight">Mittlere Hitze · Strukturaufbau</span>
+    </div>
+    <div class="step-card reveal reveal-delay-3">
+      <div class="step-num">03</div>
+      <div class="step-icon">✨</div>
+      <div class="step-title">Zweite Röstung</div>
+      <p class="step-body">Die zweite Röstung bei höherer Temperatur erzeugt die charakteristische Knusprigkeit — von innen heraus, durch den ganzen Kern. Das Ergebnis: kein weiches Zentrum, kein Mehlgeschmack, nur dieser unverwechselbare Knack.</p>
+      <span class="step-highlight">Höhere Hitze · Der Knack entsteht</span>
+    </div>
+    <div class="step-card reveal reveal-delay-4">
+      <div class="step-num">04</div>
+      <div class="step-icon">🍫</div>
+      <div class="step-title">Dragieren</div>
+      <p class="step-body">Im rotierenden Dragierkessel werden die Kichererbsen Schicht für Schicht mit echter Schweizer Kuvertüre überzogen. 8 bis 15 Schichten, jede einzeln aufgetragen und getrocknet, bis die Hülle gleichmässig, glänzend und knackig sitzt.</p>
+      <span class="step-highlight">8–15 Schichten Schweizer Kuvertüre</span>
+    </div>
+  </div>
+
+  <!-- Double Roast Explainer -->
+  <div class="double-roast reveal reveal-delay-2">
+    <div class="roast-visual">
+      <div class="roast-stage">
+        <div class="roast-circle roast-1">🫘</div>
+        <div class="roast-temp">~140°C</div>
+        <div class="roast-label">Erste Röstung</div>
+        <div style="font-size:.72rem;color:var(--mid);margin-top:.3rem;">+ Ruhezeit</div>
+      </div>
+      <div class="roast-arrow">→</div>
+      <div class="roast-stage">
+        <div class="roast-circle roast-2">🔥</div>
+        <div class="roast-temp">~180°C</div>
+        <div class="roast-label">Zweite Röstung</div>
+        <div style="font-size:.72rem;color:var(--gold);margin-top:.3rem;">Der Knack</div>
+      </div>
+      <div class="roast-arrow">→</div>
+      <div class="roast-stage">
+        <div style="font-size:2.5rem;margin-bottom:.8rem;">💎</div>
+        <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;color:var(--white);">Perfekt</div>
+        <div class="roast-label">Bereit für Schokolade</div>
+      </div>
+    </div>
+    <div class="roast-text">
+      <div class="section-eyebrow" style="font-size:.6rem;margin-bottom:1rem;">Warum Doppelrösten?</div>
+      <p>Die meisten Kichererbsensnacks werden einmal geröstet — fertig. Das Ergebnis ist oft ein weiches oder mehlig-trockenes Inneres. <strong>Beim Doppelrösten passiert etwas Anderes.</strong></p>
+      <p>Die erste Röstung baut die Struktur auf. Die Ruhephase dazwischen lässt die Hitze gleichmässig bis in den Kern eindringen. Die zweite Röstung karamellisiert dann die Stärken und Zucker von innen heraus — das erzeugt den charakteristischen, nussig-tiefen Geschmack und die Knusprigkeit, die sich anfühlt als würde die Kichererbse beim Beissen explodieren.</p>
+      <p style="margin-bottom:0;"><strong>Das ist der Unterschied, den man schmeckt.</strong> Und deshalb ist Leblebi aus Çorum weltweit bekannt — nicht einfach als geröstete Kichererbse, sondern als handwerkliches Produkt mit eigenem Charakter.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section id="warum">
+  <div class="reveal"><div class="section-eyebrow">Warum LebLeb</div></div>
+  <h2 class="section-title reveal reveal-delay-1">Der Snack, den die<br><em>Schweiz noch nicht kannte.</em></h2>
+  <div class="values-layout">
+    <div class="values-list">
+      <div class="value-item reveal reveal-delay-1">
+        <div class="value-num">01</div>
+        <div><div class="value-title">Echter Ursprung</div><p class="value-body">Leblebi kommt aus einer reichen Snack-Kultur, die von der Türkei über Griechenland bis Indien reicht. Wir nehmen diesen Ursprung ernst — mit der richtigen Sorte, dem richtigen Röstverfahren und dem richtigen Partner vor Ort.</p></div>
+      </div>
+      <div class="value-item reveal reveal-delay-2">
+        <div class="value-num">02</div>
+        <div><div class="value-title">Schweizer Schokolade. Punkt.</div><p class="value-body">Wir dragieren mit echter Schweizer Kuvertüre — Felchlin oder Barry Callebaut. Nicht irgendeine Fettglasur, sondern echte Schokolade in mehreren Schichten aufgetragen. Das schmeckt man im ersten Biss.</p></div>
+      </div>
+      <div class="value-item reveal reveal-delay-3">
+        <div class="value-num">03</div>
+        <div><div class="value-title">Protein, das Spass macht</div><p class="value-body">100g LebLeb liefern rund 18g Protein — mehr als die meisten Nüsse, mehr als viele Proteinriegel. Und dabei ohne Zusatzmix, ohne E-Nummern, ohne Chemie.</p></div>
+      </div>
+      <div class="value-item reveal reveal-delay-4">
+        <div class="value-num">04</div>
+        <div><div class="value-title">Jung gegründet. Echt gemeint.</div><p class="value-body">LebLeb wurde von zwei Schulkollegen aus der Schweiz gestartet — 15 und 16 Jahre alt. Keine Investoren, kein Konzern dahinter. Nur die Überzeugung, dass die Schweiz diesen Snack braucht.</p></div>
+      </div>
+    </div>
+    <div>
+      <div class="stat-block reveal reveal-delay-2"><div class="stat-label">Protein pro 100g</div><div class="stat-num">18<span class="stat-unit">g</span></div><p class="stat-desc">Mehr als Chips, mehr als Popcorn — und deutlich leckerer als ein Proteinriegel.</p></div>
+      <div class="stat-block reveal reveal-delay-3"><div class="stat-label">Schokoladenschichten beim Dragieren</div><div class="stat-num">8–15<span class="stat-unit"> Lagen</span></div><p class="stat-desc">Jede Schicht einzeln aufgetragen und getrocknet — das ist der Unterschied zu einfach getauchter Schokolade.</p></div>
+      <div class="stat-block reveal reveal-delay-4"><div class="stat-label">Schweizer Kuvertüre</div><div class="stat-num" style="font-size:2.5rem;">100%</div><p class="stat-desc">Felchlin oder Barry Callebaut — keine Kompromisse bei der Schokoladenqualität.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section id="story">
+  <div class="reveal"><div class="section-eyebrow">Unsere Story</div></div>
+  <h2 class="section-title reveal reveal-delay-1">Von der Idee zum<em>ersten Beutel.</em></h2>
+  <div class="story-layout">
+    <div class="story-text reveal reveal-delay-2">
+      <p>Alles begann mit einer Tüte Leblebi aus dem türkischen Supermarkt. <strong>Zwei Freunde, 15 und 16 Jahre alt</strong>, merkten schnell: diesen Snack gibt es in der Schweiz kaum — und wenn, dann ohne die Qualität, die er verdient.</p>
+      <div class="story-pull">"Warum nicht selber machen — aber richtig?"</div>
+      <p>Statt zu zögern, recherchierten sie Dragierkessel, Kuvertüre-Lieferanten, Lebensmittelrecht und Kichererbsen-Sorten. Sie lernten den Unterschied zwischen einmal und doppelgeröstet. Sie verstanden, warum Çorum-Kichererbsen anders schmecken. Und sie bauten daraus eine Marke.</p>
+      <p><strong>LebLeb ist das Ergebnis</strong> — ein Snack, auf den sie echten Stolz haben.</p>
+    </div>
+    <div class="reveal reveal-delay-3">
+      <div class="founder-card">
+        <div class="founder-head">Die Gründer</div>
+        <p class="founder-text">Zwei Schulkollegen aus der Schweiz, verbunden durch ihre Liebe zu gutem Essen und den Antrieb, etwas Eigenes aufzubauen. LebLeb ist ihr erstes Unternehmen — und mit Sicherheit nicht ihr letztes.</p>
+        <div class="founder-names">Gegründet 2025 · Schweiz · Alter: 15 & 16</div>
+      </div>
+      <div class="progress-list">
+        <div class="section-eyebrow" style="font-size:.6rem;margin-bottom:.2rem;">Aktueller Stand</div>
+        <div class="progress-item"><div class="prog-dot" style="background:var(--gold);"></div><span class="prog-text">Import-Partner Türkei (Çorum-Region) gesichert</span></div>
+        <div class="progress-item"><div class="prog-dot" style="background:var(--gold);"></div><span class="prog-text">Kichererbsen-Sorte ausgewählt & getestet</span></div>
+        <div class="progress-item"><div class="prog-dot" style="background:var(--gold);"></div><span class="prog-text">Kuvertüre-Qualität festgelegt (Schweizer)</span></div>
+        <div class="progress-item"><div class="prog-dot" style="background:var(--green);"></div><span class="prog-text">Verpackungsdesign & Markenidentität fertig</span></div>
+        <div class="progress-item"><div class="prog-dot" style="background:var(--border);"></div><span class="prog-text" style="color:var(--mid);">Lebensmittelkennzeichnung (in Arbeit)</span></div>
+        <div class="progress-item"><div class="prog-dot" style="background:var(--border);"></div><span class="prog-text" style="color:var(--mid);">Online Shop Launch (folgt)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section id="newsletter">
+  <h2 class="newsletter-title reveal">Bereit für den <em>besten Snack</em><br>der Schweiz?</h2>
+  <p class="newsletter-sub reveal reveal-delay-1">Trag dich ein und erhalte als Erste/r Bescheid, wenn LebLeb erhältlich ist.</p>
+  <div class="email-form reveal reveal-delay-2">
+    <input class="email-input" type="email" placeholder="deine@email.ch">
+    <button class="email-submit">Dabei sein</button>
+  </div>
+  <p style="font-size:.65rem;color:var(--mid);margin-top:1.2rem;" class="reveal reveal-delay-3">Kein Spam. Nur die wichtigsten News. Jederzeit abmeldbar.</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Leb<em>Leb</em></div>
+  <ul class="footer-links">
+    <li><a href="#produkte">Produkte</a></li>
+    <li><a href="#origins">Herkunft</a></li>
+    <li><a href="#prozess">Herstellung</a></li>
+    <li><a href="#story">Story</a></li>
+  </ul>
+  <div class="footer-copy">© 2025 LebLeb · Schweiz · snack dich smart</div>
+</footer>
+
+<script>
+/* Cursor */
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim);})();
+document.querySelectorAll('a,button,.product-card,.step-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='18px';cursor.style.height='18px';ring.style.width='56px';ring.style.height='56px';});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='10px';cursor.style.height='10px';ring.style.width='36px';ring.style.height='36px';});
+});
+
+/* Sticky nav */
+const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>60));
+
+/* Scroll reveal */
+const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* Email form */
+document.querySelector('.email-submit').addEventListener('click',()=>{
+  const v=document.querySelector('.email-input').value;
+  if(v&&v.includes('@')){document.querySelector('.email-form').innerHTML='<p style="color:var(--gold);font-family:Fraunces,serif;font-style:italic;font-size:1.1rem;">Danke! Wir melden uns. 🎉</p>';}
+});
+</script>
+</body>
+</html>
